@@ -231,14 +231,12 @@
     .page-button svg { width: 16px; height: 16px; }
     .page-label { min-width: 100px; color: var(--muted); font-size: 11px; text-align: center; }
 
-    .earth-project { display: grid; min-height: 300px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 32px; padding: 36px; border-radius: 8px; background: var(--green-dark); color: white; }
-    .earth-project-copy { max-width: 560px; }
-    .earth-project-kicker { margin: 0 0 10px; color: var(--lime); font-size: 11px; font-weight: 700; text-transform: uppercase; }
-    .earth-project-title { margin: 0; font-family: "Fraunces", Georgia, serif; font-size: 32px; font-weight: 500; }
-    .earth-project-note { max-width: 520px; margin: 12px 0 0; color: #d2e6d9; font-size: 13px; line-height: 1.7; }
-    .earth-project-link { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 9px; padding: 0 16px; border-radius: 6px; background: var(--lime); color: var(--green-dark); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background 160ms ease, transform 160ms ease; }
-    .earth-project-link:hover { transform: translateY(-1px); background: #e9f3ae; }
-    .earth-project-link svg { width: 16px; height: 16px; }
+    .cesium-panel { padding: 0; }
+    .cesium-toolbar { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 20px; border-bottom: 1px solid var(--line); }
+    .cesium-caption { margin: 0; color: var(--muted); font-size: 12px; }
+    .cesium-link { color: var(--green); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .cesium-link:hover { text-decoration: underline; }
+    .cesium-frame { display: block; width: 100%; height: min(74vh, 760px); min-height: 520px; border: 0; background: #dfe8e6; }
 
     .empty-state { padding: 50px 20px; text-align: center; }
     .empty-icon { display: grid; width: 44px; height: 44px; margin: 0 auto 14px; place-items: center; border-radius: 50%; background: #f8e9e4; color: #a74f3b; }
@@ -260,9 +258,9 @@
       .tabs { gap: 22px; min-height: 52px; padding: 0 16px; }
       .tab { min-height: 52px; }
       .panel { padding: 16px; }
-      .earth-project { min-height: 260px; grid-template-columns: 1fr; gap: 22px; padding: 24px; }
-      .earth-project-title { font-size: 28px; }
-      .earth-project-link { justify-self: start; }
+      .cesium-toolbar { min-height: 52px; padding: 10px 14px; }
+      .cesium-caption { font-size: 11px; }
+      .cesium-frame { height: 68vh; min-height: 430px; }
       .overview-grid { grid-template-columns: 1fr; }
       .summary { min-height: 215px; }
       .side-stats { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
@@ -382,18 +380,12 @@
           </div>
         </section>
 
-        <section class="panel" id="projectPanel" role="tabpanel" aria-labelledby="projectTab" hidden>
-          <div class="earth-project">
-            <div class="earth-project-copy">
-              <p class="earth-project-kicker">Projeto compartilhado</p>
-              <h2 class="earth-project-title">Comunidades Rurais</h2>
-              <p class="earth-project-note">O Google Earth não permite incorporar este projeto compartilhado dentro de outro site. Abra o projeto no Earth para explorar o mapa completo.</p>
-            </div>
-            <a class="earth-project-link" href="https://earth.google.com/earth/d/1WiYrq9xgROuRRJoFwIrFEnfGo77ttYg_?usp=sharing" target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7m-11 4L21 3"/><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/></svg>
-              Abrir no Google Earth Web
-            </a>
+        <section class="panel cesium-panel" id="projectPanel" role="tabpanel" aria-labelledby="projectTab" hidden>
+          <div class="cesium-toolbar">
+            <p class="cesium-caption">Globo 3D com pontos, trajetos e polígonos do KML</p>
+            <a class="cesium-link" href="https://earth.google.com/earth/d/1WiYrq9xgROuRRJoFwIrFEnfGo77ttYg_?usp=sharing" target="_blank" rel="noopener noreferrer">Abrir projeto no Google Earth ↗</a>
           </div>
+          <iframe class="cesium-frame" src="./cesium.html" title="Globo 3D das Comunidades Rurais" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
         </section>
       </section>
     </main>
@@ -401,8 +393,8 @@
 
   <script>
     const earthBaseUrl = "https://earth.google.com/web/@";
-    const tabs = [document.getElementById("overviewTab"), document.getElementById("coordinatesTab")];
-    const panels = [document.getElementById("overviewPanel"), document.getElementById("coordinatesPanel")];
+    const tabs = [document.getElementById("overviewTab"), document.getElementById("coordinatesTab"), document.getElementById("projectTab")];
+    const panels = [document.getElementById("overviewPanel"), document.getElementById("coordinatesPanel"), document.getElementById("projectPanel")];
     const fileStatus = document.getElementById("fileStatus");
     const statusText = document.getElementById("statusText");
     const coordinateRows = document.getElementById("coordinateRows");

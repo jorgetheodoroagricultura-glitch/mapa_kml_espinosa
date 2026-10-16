@@ -1,6 +1,6 @@
 # Mapa Espinosa
 
-Site estático para consultar as coordenadas de um arquivo KML e abrir cada ponto no Google Earth Web.
+Site estático para consultar coordenadas, visualizar as geometrias do KML em um globo Cesium incorporado e abrir o projeto no Google Earth Web.
 
 Publicado em: https://jorgetheodoroagricultura-glitch.github.io/mapa_kml_espinosa/ . Atualizações em `main` são publicadas automaticamente pelo GitHub Actions.
 
@@ -12,4 +12,4 @@ Para testar localmente, sirva a pasta por HTTP, por exemplo com `python3 -m http
 
 ## Google Earth Web
 
-A lista paginada abre cada coordenada no Google Earth Web. A aba “Projeto Earth” abre o projeto compartilhado [Comunidades Rurais](https://earth.google.com/earth/d/1WiYrq9xgROuRRJoFwIrFEnfGo77ttYg_?usp=sharing). O Google Earth envia `X-Frame-Options: SAMEORIGIN`, então não permite exibir esse projeto dentro de um `iframe` hospedado em outro site.
+A lista paginada abre cada coordenada no Google Earth Web. A aba “Projeto Earth” incorpora um globo Cesium com as geometrias do KML; o botão da aba também abre o projeto compartilhado [Comunidades Rurais](https://earth.google.com/earth/d/1WiYrq9xgROuRRJoFwIrFEnfGo77ttYg_?usp=sharing). O projeto original não pode ser incorporado diretamente porque o Google Earth envia `X-Frame-Options: SAMEORIGIN`.

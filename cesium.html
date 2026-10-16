@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Globo 3D | Comunidades Rurais</title>
+  <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Widgets/widgets.css">
+  <script>window.CESIUM_BASE_URL = "https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/";</script>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
+  <style>
+    :root { color-scheme: light; font-family: "DM Sans", sans-serif; }
+    * { box-sizing: border-box; }
+    html, body, #globe { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #dfe8e6; }
+    #status {
+      position: absolute;
+      z-index: 2;
+      top: 12px;
+      left: 12px;
+      max-width: calc(100% - 24px);
+      padding: 8px 11px;
+      border: 1px solid rgb(220 226 220 / 85%);
+      border-radius: 5px;
+      background: rgb(255 255 255 / 94%);
+      color: #34433d;
+      font-size: 12px;
+      line-height: 1.4;
+      box-shadow: 0 2px 12px rgb(20 43 35 / 12%);
+    }
+    #status[data-state="error"] { color: #9b392b; }
+    .cesium-viewer-bottom { left: 12px; }
+    @media (max-width: 600px) {
+      #status { top: 8px; left: 8px; max-width: calc(100% - 16px); font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="status" role="status" aria-live="polite">Carregando o globo e o mapa...</div>
+  <div id="globe" aria-label="Globo 3D com as geometrias do KML"></div>
+
+  <script>
+    const statusElement = document.getElementById("status");
+
+    function setStatus(message, isError = false) {
+      statusElement.textContent = message;
+      statusElement.dataset.state = isError ? "error" : "ready";
+    }
+
+    async function loadMap() {
+      try {
+        const viewer = new Cesium.Viewer("globe", {
+          animation: false,
+          baseLayerPicker: false,
+          geocoder: false,
+          homeButton: true,
+          sceneModePicker: false,
+          navigationHelpButton: false,
+          timeline: false,
+          fullscreenButton: true,
+          infoBox: true,
+          selectionIndicator: true,
+          scene3DOnly: true,
+          terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+          imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+            url: "https://tile.openstreetmap.org/"
+          })
+        });
+
+        viewer.scene.globe.enableLighting = true;
+        viewer.scene.screenSpaceCameraController.minimumZoomDistance = 25;
+        const dataSource = await Cesium.KmlDataSource.load("./Comunidades%20Rurais.kml", {
+          camera: viewer.scene.camera,
+          canvas: viewer.scene.canvas,
+          clampToGround: true
+        });
+        await viewer.dataSources.add(dataSource);
+        await viewer.zoomTo(dataSource, new Cesium.HeadingPitchRange(
+          0,
+          Cesium.Math.toRadians(-38),
+          0
+        ));
+        setStatus(`${dataSource.entities.values.length.toLocaleString("pt-BR")} elementos carregados`);
+      } catch (error) {
+        setStatus(`Não foi possível carregar o KML: ${error.message}`, true);
+      }
+    }
+
+    loadMap();
+  </script>
+</body>
+</html>
