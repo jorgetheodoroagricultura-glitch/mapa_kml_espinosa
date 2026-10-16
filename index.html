@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5f0">
+  <title>Mapa Espinosa | Coordenadas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f5f0;
+      --surface: #fff;
+      --ink: #172522;
+      --muted: #65716c;
+      --line: #dce2dc;
+      --green: #176b55;
+      --green-dark: #104b3c;
+      --lime: #dce982;
+      --coral: #df7057;
+      --soft-green: #eaf2ed;
+      --shadow: 0 18px 50px rgb(26 46 39 / 7%);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background-color: var(--paper);
+      background-image: linear-gradient(rgb(23 37 34 / 2.5%) 1px, transparent 1px), linear-gradient(90deg, rgb(23 37 34 / 2.5%) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+    }
+
+    button, input { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--green);
+      color: var(--lime);
+    }
+
+    .brand-mark svg { width: 23px; height: 23px; }
+    .brand-name { font-size: 14px; font-weight: 700; }
+    .brand-caption { margin-top: 2px; color: var(--muted); font-size: 11px; }
+
+    .file-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 45%;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--coral); }
+    .file-status[data-state="ready"] .status-dot { background: var(--green); }
+    .status-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .intro {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 28px;
+      padding: 48px 0 32px;
+    }
+
+    .eyebrow { margin: 0 0 10px; color: var(--green); font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; }
+    h1 { margin: 0; font-family: "Fraunces", Georgia, serif; font-size: 42px; font-weight: 500; line-height: 1.08; }
+    .intro-copy { max-width: 480px; margin: 12px 0 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+
+    .earth-button {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--green);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .earth-button:hover { transform: translateY(-1px); background: var(--green-dark); }
+    .earth-button svg { width: 17px; height: 17px; }
+
+    .workspace {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      min-height: 58px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab {
+      position: relative;
+      display: inline-flex;
+      min-height: 58px;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .tab[aria-selected="true"] { color: var(--green-dark); }
+    .tab[aria-selected="true"]::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 3px; background: var(--green); content: ""; }
+    .tab-count { margin-left: 8px; padding: 2px 7px; border-radius: 20px; background: var(--soft-green); color: var(--green-dark); font-size: 10px; }
+    .panel { padding: 24px; }
+    .panel[hidden] { display: none; }
+
+    .overview-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(250px, .65fr); gap: 18px; }
+
+    .summary {
+      position: relative;
+      display: flex;
+      min-height: 246px;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: 24px;
+      border-radius: 8px;
+      background: var(--green-dark);
+      color: white;
+    }
+
+    .summary::after {
+      position: absolute;
+      top: -80px;
+      right: -52px;
+      width: 280px;
+      height: 280px;
+      border: 1px solid rgb(220 233 130 / 22%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 28px rgb(220 233 130 / 5%), 0 0 0 58px rgb(220 233 130 / 4%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .summary-kicker { position: relative; z-index: 1; margin: 0; color: #d2e6d9; font-size: 12px; }
+    .summary-number { position: relative; z-index: 1; margin: 10px 0 3px; font-family: "Fraunces", Georgia, serif; font-size: 54px; line-height: 1; }
+    .summary-label { position: relative; z-index: 1; color: #d2e6d9; font-size: 12px; }
+    .summary-bottom { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+    .summary-name { max-width: 65%; overflow: hidden; color: #fff; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .summary-link { color: var(--lime); font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .summary-link:hover { text-decoration: underline; }
+
+    .side-stats { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
+    .stat { display: flex; min-height: 116px; flex-direction: column; justify-content: space-between; padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfa; }
+    .stat-label { color: var(--muted); font-size: 12px; }
+    .stat-value { font-family: "Fraunces", Georgia, serif; font-size: 28px; }
+
+    .table-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .section-title { margin: 0; font-family: "Fraunces", Georgia, serif; font-size: 25px; font-weight: 500; }
+    .section-caption { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+
+    .search-wrap { position: relative; width: min(280px, 100%); }
+    .search-wrap svg { position: absolute; top: 11px; left: 11px; width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
+    .search {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px 0 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      outline: none;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .search:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(23 107 85 / 10%); }
+    .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 7px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { height: 40px; padding: 0 14px; background: #f7f9f6; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; white-space: nowrap; }
+    td { height: 53px; padding: 0 14px; border-top: 1px solid #edf0ec; font-size: 12px; white-space: nowrap; }
+    tbody tr:hover { background: #fbfcfa; }
+    .coordinate { font-variant-numeric: tabular-nums; }
+    .feature-name { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
+    .geometry { display: inline-flex; padding: 4px 8px; border-radius: 4px; background: var(--soft-green); color: var(--green-dark); font-size: 10px; }
+    .row-earth { display: inline-flex; align-items: center; gap: 6px; color: var(--green); font-size: 11px; font-weight: 700; text-decoration: none; }
+    .row-earth:hover { text-decoration: underline; }
+    .row-earth svg { width: 14px; height: 14px; }
+
+    .pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 14px; }
+    .page-button { display: inline-flex; min-width: 36px; min-height: 34px; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: white; color: var(--ink); cursor: pointer; }
+    .page-button:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+    .page-button:disabled { cursor: not-allowed; opacity: .45; }
+    .page-button svg { width: 16px; height: 16px; }
+    .page-label { min-width: 100px; color: var(--muted); font-size: 11px; text-align: center; }
+
+    .earth-project { display: grid; min-height: 300px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 32px; padding: 36px; border-radius: 8px; background: var(--green-dark); color: white; }
+    .earth-project-copy { max-width: 560px; }
+    .earth-project-kicker { margin: 0 0 10px; color: var(--lime); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .earth-project-title { margin: 0; font-family: "Fraunces", Georgia, serif; font-size: 32px; font-weight: 500; }
+    .earth-project-note { max-width: 520px; margin: 12px 0 0; color: #d2e6d9; font-size: 13px; line-height: 1.7; }
+    .earth-project-link { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 9px; padding: 0 16px; border-radius: 6px; background: var(--lime); color: var(--green-dark); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background 160ms ease, transform 160ms ease; }
+    .earth-project-link:hover { transform: translateY(-1px); background: #e9f3ae; }
+    .earth-project-link svg { width: 16px; height: 16px; }
+
+    .empty-state { padding: 50px 20px; text-align: center; }
+    .empty-icon { display: grid; width: 44px; height: 44px; margin: 0 auto 14px; place-items: center; border-radius: 50%; background: #f8e9e4; color: #a74f3b; }
+    .empty-icon svg { width: 20px; height: 20px; }
+    .empty-title { margin: 0; font-size: 14px; font-weight: 700; }
+    .empty-copy { max-width: 420px; margin: 7px auto 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .empty-state[hidden], .table-content[hidden] { display: none; }
+    .footer-note { display: flex; align-items: flex-start; gap: 9px; margin-top: 16px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .footer-note svg { width: 15px; height: 15px; flex: 0 0 auto; color: var(--green); }
+
+    @media (max-width: 700px) {
+      .shell { width: min(100% - 28px, 560px); padding-top: 18px; }
+      .topbar { padding-bottom: 18px; }
+      .file-status { max-width: 48%; font-size: 10px; }
+      .intro { align-items: flex-start; flex-direction: column; padding: 34px 0 22px; }
+      h1 { font-size: 36px; }
+      .intro-copy { font-size: 13px; }
+      .earth-button { min-height: 40px; }
+      .tabs { gap: 22px; min-height: 52px; padding: 0 16px; }
+      .tab { min-height: 52px; }
+      .panel { padding: 16px; }
+      .earth-project { min-height: 260px; grid-template-columns: 1fr; gap: 22px; padding: 24px; }
+      .earth-project-title { font-size: 28px; }
+      .earth-project-link { justify-self: start; }
+      .overview-grid { grid-template-columns: 1fr; }
+      .summary { min-height: 215px; }
+      .side-stats { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .stat { min-height: 98px; padding: 14px; }
+      .table-head { align-items: stretch; flex-direction: column; }
+      .search-wrap { width: 100%; }
+      th, td { padding-right: 11px; padding-left: 11px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Mapa Espinosa">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/><path d="M3 19h4m10 0h4"/></svg>
+        </span>
+        <div>
+          <div class="brand-name">Mapa Espinosa</div>
+          <div class="brand-caption">Dados geográficos</div>
+        </div>
+      </div>
+      <div class="file-status" id="fileStatus" data-state="loading" role="status" aria-live="polite">
+        <span class="status-dot"></span>
+        <span class="status-text" id="statusText">Carregando mapa...</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div>
+          <p class="eyebrow">Explorador geográfico</p>
+          <h1 id="pageTitle">Mapa Espinosa</h1>
+          <p class="intro-copy">Consulte os pontos do mapa e abra qualquer coordenada diretamente no Google Earth Web.</p>
+        </div>
+        <a class="earth-button" id="earthButton" href="https://earth.google.com/earth/d/1WiYrq9xgROuRRJoFwIrFEnfGo77ttYg_?usp=sharing" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M5 16h14M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z"/></svg>
+          Abrir projeto no Earth
+        </a>
+      </section>
+
+      <section class="workspace" aria-label="Visualização do mapa">
+        <div class="tabs" role="tablist" aria-label="Seções do mapa">
+          <button class="tab" id="overviewTab" type="button" role="tab" aria-selected="true" aria-controls="overviewPanel">Visão geral</button>
+          <button class="tab" id="coordinatesTab" type="button" role="tab" aria-selected="false" aria-controls="coordinatesPanel" tabindex="-1">Coordenadas <span class="tab-count" id="tabCount">0</span></button>
+          <button class="tab" id="projectTab" type="button" role="tab" aria-selected="false" aria-controls="projectPanel" tabindex="-1">Projeto Earth</button>
+        </div>
+
+        <section class="panel" id="overviewPanel" role="tabpanel" aria-labelledby="overviewTab">
+          <div class="overview-grid">
+            <article class="summary">
+              <div>
+                <p class="summary-kicker">Pontos geográficos identificados</p>
+                <div class="summary-number" id="pointCount">--</div>
+                <div class="summary-label">coordenadas no arquivo KML</div>
+              </div>
+              <div class="summary-bottom">
+                <span class="summary-name" id="mapFileName">Mapa KML</span>
+                <a class="summary-link" href="#coordinates" id="viewCoordinates">Ver coordenadas <span aria-hidden="true">&#8594;</span></a>
+              </div>
+            </article>
+            <div class="side-stats">
+              <article class="stat">
+                <span class="stat-label">Elementos do mapa</span>
+                <strong class="stat-value" id="featureCount">--</strong>
+              </article>
+              <article class="stat">
+                <span class="stat-label">Formato de origem</span>
+                <strong class="stat-value">KML</strong>
+              </article>
+            </div>
+          </div>
+          <p class="footer-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+            O Google Earth Web abre cada ponto pelas coordenadas. Para visualizar linhas e polígonos do KML no Earth, importe o arquivo em um projeto do Google Earth e compartilhe esse projeto.
+          </p>
+        </section>
+
+        <section class="panel" id="coordinatesPanel" role="tabpanel" aria-labelledby="coordinatesTab" hidden>
+          <div class="table-content" id="tableContent" hidden>
+            <div class="table-head">
+              <div>
+                <h2 class="section-title">Coordenadas</h2>
+                <p class="section-caption" id="tableCaption">Pontos encontrados no mapa</p>
+              </div>
+              <label class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+                <input class="search" id="searchInput" type="search" placeholder="Buscar nome ou coordenada" autocomplete="off" aria-label="Buscar nome ou coordenada">
+              </label>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th scope="col">Elemento</th><th scope="col">Tipo</th><th scope="col">Latitude</th><th scope="col">Longitude</th><th scope="col">Altitude</th><th scope="col">Abrir</th></tr>
+                </thead>
+                <tbody id="coordinateRows"></tbody>
+              </table>
+            </div>
+            <nav class="pagination" id="pagination" aria-label="Páginas de coordenadas" hidden>
+              <button class="page-button" id="previousPage" type="button" aria-label="Página anterior" title="Página anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <span class="page-label" id="pageLabel" aria-live="polite"></span>
+              <button class="page-button" id="nextPage" type="button" aria-label="Próxima página" title="Próxima página">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </nav>
+          </div>
+          <div class="empty-state" id="emptyState" role="status">
+            <div class="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.8 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z"/></svg></div>
+            <h2 class="empty-title" id="emptyTitle">Mapa KML indisponível</h2>
+            <p class="empty-copy" id="emptyCopy">O arquivo mapa.kml ainda não foi publicado junto ao site.</p>
+          </div>
+        </section>
+
+        <section class="panel" id="projectPanel" role="tabpanel" aria-labelledby="projectTab" hidden>
+          <div class="earth-project">
+            <div class="earth-project-copy">
+              <p class="earth-project-kicker">Projeto compartilhado</p>
+              <h2 class="earth-project-title">Comunidades Rurais</h2>
+              <p class="earth-project-note">O Google Earth não permite incorporar este projeto compartilhado dentro de outro site. Abra o projeto no Earth para explorar o mapa completo.</p>
+            </div>
+            <a class="earth-project-link" href="https://earth.google.com/earth/d/1WiYrq9xgROuRRJoFwIrFEnfGo77ttYg_?usp=sharing" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7m-11 4L21 3"/><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/></svg>
+              Abrir no Google Earth Web
+            </a>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const earthBaseUrl = "https://earth.google.com/web/@";
+    const tabs = [document.getElementById("overviewTab"), document.getElementById("coordinatesTab")];
+    const panels = [document.getElementById("overviewPanel"), document.getElementById("coordinatesPanel")];
+    const fileStatus = document.getElementById("fileStatus");
+    const statusText = document.getElementById("statusText");
+    const coordinateRows = document.getElementById("coordinateRows");
+    const searchInput = document.getElementById("searchInput");
+    const pageSize = 100;
+    let coordinates = [];
+    let currentPage = 0;
+    let filteredCoordinates = [];
+
+    function earthUrl(latitude, longitude, altitude) {
+      const cameraAltitude = Math.max(300, (altitude || 0) + 900);
+      return `${earthBaseUrl}${latitude},${longitude},${cameraAltitude}a,35y,0h,0t,0r`;
+    }
+
+    function elementsByLocalName(element, localName) {
+      return Array.from(element.getElementsByTagName("*")).filter((child) => child.localName === localName);
+    }
+
+    function parseKml(xmlText) {
+      const documentXml = new DOMParser().parseFromString(xmlText, "application/xml");
+      if (documentXml.getElementsByTagName("parsererror").length) {
+        throw new Error("O arquivo não contém um XML KML válido.");
+      }
+
+      const placemarks = elementsByLocalName(documentXml, "Placemark");
+      const parsed = [];
+
+      placemarks.forEach((placemark, featureIndex) => {
+        const nameElement = elementsByLocalName(placemark, "name")[0];
+        const featureName = nameElement?.textContent.trim() || `Elemento ${featureIndex + 1}`;
+        const geometry = elementsByLocalName(placemark, "Point").length ? "Ponto"
+          : elementsByLocalName(placemark, "LineString").length ? "Linha"
+          : elementsByLocalName(placemark, "Polygon").length ? "Polígono"
+          : "Elemento";
+
+        elementsByLocalName(placemark, "coordinates").forEach((coordinateElement) => {
+          coordinateElement.textContent.trim().split(/\s+/).forEach((tuple) => {
+            const values = tuple.split(",").map(Number);
+            if (values.length < 2 || !Number.isFinite(values[0]) || !Number.isFinite(values[1])) return;
+            const [longitude, latitude, altitude = 0] = values;
+            if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) return;
+            parsed.push({
+              name: featureName,
+              geometry,
+              longitude,
+              latitude,
+              altitude: Number.isFinite(altitude) ? altitude : 0
+            });
+          });
+        });
+      });
+
+      return { coordinates: parsed, featureCount: placemarks.length };
+    }
+
+    function formatCoordinate(value) {
+      return value.toFixed(6);
+    }
+
+    function setActiveTab(activeIndex) {
+      tabs.forEach((tab, index) => {
+        const active = index === activeIndex;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        panels[index].hidden = !active;
+      });
+    }
+
+    function renderRows(items, resetPage = false) {
+      if (resetPage) currentPage = 0;
+      filteredCoordinates = items;
+      const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+      currentPage = Math.min(currentPage, pageCount - 1);
+      const pageItems = items.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+      coordinateRows.replaceChildren();
+      const fragment = document.createDocumentFragment();
+
+      pageItems.forEach((item, index) => {
+        const row = document.createElement("tr");
+        const cells = [
+          { text: item.name, className: "feature-name", title: item.name },
+          { text: item.geometry, badge: true },
+          { text: formatCoordinate(item.latitude), className: "coordinate" },
+          { text: formatCoordinate(item.longitude), className: "coordinate" },
+          { text: `${item.altitude.toFixed(1)} m`, className: "coordinate" }
+        ];
+
+        cells.forEach((cell) => {
+          const td = document.createElement("td");
+          if (cell.badge) {
+            const badge = document.createElement("span");
+            badge.className = "geometry";
+            badge.textContent = cell.text;
+            td.append(badge);
+          } else {
+            td.textContent = cell.text;
+            if (cell.className) td.className = cell.className;
+            if (cell.title) td.title = cell.title;
+          }
+          row.append(td);
+        });
+
+        const actionCell = document.createElement("td");
+        const link = document.createElement("a");
+        link.className = "row-earth";
+        link.href = earthUrl(item.latitude, item.longitude, item.altitude);
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.setAttribute("aria-label", `Abrir coordenada ${currentPage * pageSize + index + 1} no Google Earth Web`);
+        link.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M5 16h14M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z"/></svg><span>Ver no Earth</span>';
+        actionCell.append(link);
+        row.append(actionCell);
+        fragment.append(row);
+      });
+
+      coordinateRows.append(fragment);
+      document.getElementById("tableCaption").textContent = `${items.length} ${items.length === 1 ? "coordenada encontrada" : "coordenadas encontradas"}`;
+      document.getElementById("pagination").hidden = items.length <= pageSize;
+      document.getElementById("previousPage").disabled = currentPage === 0;
+      document.getElementById("nextPage").disabled = currentPage >= pageCount - 1;
+      document.getElementById("pageLabel").textContent = `Página ${currentPage + 1} de ${pageCount}`;
+    }
+
+    function showLoadError(message) {
+      fileStatus.dataset.state = "error";
+      statusText.textContent = "KML não carregado";
+      document.getElementById("pointCount").textContent = "0";
+      document.getElementById("featureCount").textContent = "0";
+      document.getElementById("emptyTitle").textContent = "Mapa KML indisponível";
+      document.getElementById("emptyCopy").textContent = message;
+    }
+
+    function renderMap(result) {
+      coordinates = result.coordinates;
+      if (!coordinates.length) {
+        showLoadError("O arquivo foi encontrado, mas não contém coordenadas de elementos compatíveis.");
+        return;
+      }
+
+      fileStatus.dataset.state = "ready";
+      statusText.textContent = "Mapa carregado";
+      document.getElementById("pointCount").textContent = coordinates.length.toLocaleString("pt-BR");
+      document.getElementById("featureCount").textContent = result.featureCount.toLocaleString("pt-BR");
+      document.getElementById("tabCount").textContent = coordinates.length.toLocaleString("pt-BR");
+      document.getElementById("tableContent").hidden = false;
+      document.getElementById("emptyState").hidden = true;
+      document.getElementById("mapFileName").textContent = "Comunidades Rurais.kml";
+      const first = coordinates[0];
+      renderRows(coordinates, true);
+    }
+
+    tabs.forEach((tab, index) => tab.addEventListener("click", () => setActiveTab(index)));
+    tabs.forEach((tab, index) => tab.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      const nextIndex = event.key === "ArrowRight" ? (index + 1) % tabs.length : (index + tabs.length - 1) % tabs.length;
+      setActiveTab(nextIndex);
+      tabs[nextIndex].focus();
+    }));
+
+    document.getElementById("viewCoordinates").addEventListener("click", (event) => {
+      event.preventDefault();
+      setActiveTab(1);
+      tabs[1].focus();
+    });
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.trim().toLocaleLowerCase("pt-BR");
+      const filtered = coordinates.filter((item) => [
+        item.name,
+        item.geometry,
+        formatCoordinate(item.latitude),
+        formatCoordinate(item.longitude)
+      ].some((value) => value.toLocaleLowerCase("pt-BR").includes(query)));
+      renderRows(filtered, true);
+    });
+
+    document.getElementById("previousPage").addEventListener("click", () => {
+      if (currentPage === 0) return;
+      currentPage -= 1;
+      renderRows(filteredCoordinates);
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+      if ((currentPage + 1) * pageSize >= filteredCoordinates.length) return;
+      currentPage += 1;
+      renderRows(filteredCoordinates);
+    });
+
+    fetch("./Comunidades%20Rurais.kml")
+      .then((response) => {
+        if (!response.ok) throw new Error("O arquivo Comunidades Rurais.kml ainda não foi publicado junto ao site.");
+        return response.text();
+      })
+      .then(parseKml)
+      .then(renderMap)
+      .catch((error) => showLoadError(error.message));
+  </script>
+</body>
+</html>
