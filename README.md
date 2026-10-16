@@ -2,6 +2,8 @@
 
 Site estático para consultar as coordenadas de um arquivo KML e abrir cada ponto no Google Earth Web.
 
+Publicado em: https://jorgetheodoroagricultura-glitch.github.io/mapa_kml_espinosa/ . Atualizações em `main` são publicadas automaticamente pelo GitHub Actions.
+
 ## Publicar o mapa
 
 Coloque o arquivo `Comunidades Rurais.kml` na raiz do site, ao lado de `index.html`. O navegador lê esse arquivo hospedado, então todos os visitantes veem o mesmo mapa. O KML não é enviado a um servidor por um formulário.
